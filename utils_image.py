@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
-import numpy as np
 import os
+
+import numpy as np
 from scipy import ndimage
 from scipy.misc import imread, imsave
-from skimage.filter import threshold_otsu, rank
+from skimage.filters import threshold_otsu, rank
 from skimage.morphology import disk
+from skimage.transform import resize
+
 
 def load_imgs(path):
     """Given a path load image(s). 
@@ -28,21 +31,21 @@ def load_imgs(path):
         imagepath = os.path.dirname(path)
     print '{} images found in {}'.format(len(filenames), path)
 
-
     ## Load images
     imgs = dict()
     for file in filenames:
         print '\nImage: {}'.format(file)
-        imgs[file]=imread(os.path.join(imagepath, file))
+        imgs[file] = imread(os.path.join(imagepath, file))
 
     return imgs
+
 
 def save_img(img, filename):
     """Given a numpy array image save image under filename."""
 
-    if os.path.dirname(filename)=='':
+    if os.path.dirname(filename) == '':
         path = os.getcwd()
-    else: 
+    else:
         path = os.path.dirname(filename)
 
     if not os.path.exists(path):
@@ -50,6 +53,7 @@ def save_img(img, filename):
 
     filename = os.path.join(path, filename)
     imsave(filename, img)
+
 
 def rename_imgs(path):
     """Given a path rename image(s). 
@@ -59,8 +63,9 @@ def rename_imgs(path):
     The filename, the original file id and other metadata will be stored into a text file in the same directory.
     """
 
-def resize_img(img, size=(400, 400), interp='bilinear', mode='None'):
-    return scipy.misc.imresize(img, size, interp, mode)
+
+def resize_img(img, size=(400, 400), mode=None):
+    return resize(img, size, mode=mode)
 
 
 def rgb2gray(img):
@@ -69,15 +74,18 @@ def rgb2gray(img):
     img = 0.299 R + 0.587 G + 0.114 B
     """
     print 'Convert RGB image to gray scale.'
-    return np.uint8(np.dot(img[...,:3], [0.299, 0.587, 0.114]))
+    return np.uint8(np.dot(img[..., :3], [0.299, 0.587, 0.114]))
+
 
 def gauss_filter(img, sigma=4, mode='nearest'):
     print 'Smooth image using a Gaussian kernel sigma {}'.format(sigma)
     return ndimage.filters.gaussian_filter(img, sigma=sigma, mode=mode)
 
+
 def median_filter(img, size=4):
     print 'Smooth image using a median filter size {}'.format(size)
     return ndimage.filters.median_filter(img, size)
+
 
 def threshold_img(img, method='global_otsu', radius=50):
     """ Given a gray scale image return a thresholded binary image using Otsu's thresholding method.
@@ -100,7 +108,7 @@ def threshold_img(img, method='global_otsu', radius=50):
 
     if method == 'global_otsu':
         threshold = threshold_otsu(img)
-        img_binary = img >= threshold 
+        img_binary = img >= threshold
 
     elif method == 'local_otsu':
         selem = disk(radius)
